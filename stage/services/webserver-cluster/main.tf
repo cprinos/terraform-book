@@ -1,14 +1,6 @@
 provider "aws" {
     region = "us-east-1"
 }
-variable "server_port" {
-    description = "the port the server uses for http"
-    default = 8080
-}
-
-output "public_ip" {
-    value = "${aws_elb.example.dns_name}"
-}
 
 resource "aws_launch_configuration" "example-asg" {
     image_id = "ami-40d28157"
@@ -98,4 +90,13 @@ resource "aws_security_group" "elb" {
         protocol = "-1"
         cidr_blocks = ["0.0.0.0/0"]
     }
+}
+
+terraform {
+  backend "s3" {
+    bucket = "cjpzip-terraform-up-and-running-state"
+    key    = "stage/services/webserver"
+    region = "us-east-1"
+    encrypt = true
+  }
 }
