@@ -1,7 +1,7 @@
 module "database" {
     source = "../../../modules/data-stores/mysql"
 
-    db_name = "dbstage"
+    db_name = "dbprod"
     db_password = "${var.db_password}"
 }
 
