@@ -1,7 +1,16 @@
 provider "aws" {
     region = "us-east-1"
 }
+data "aws_availability_zones" "all" {}
+data "terraform_remote_state" "db" {
+    backend = "s3"
 
+    config {
+        bucket = "cjpzip-terraform-up-and-running-state"
+        key = "stage/data-stores/mysql"
+        region = "us-east-1"
+    }
+}
 resource "aws_launch_configuration" "example-asg" {
     image_id = "ami-40d28157"
     instance_type = "t2.micro"
@@ -9,7 +18,10 @@ resource "aws_launch_configuration" "example-asg" {
 
    user_data = <<-EOF
         #!/bin/bash
-        echo "Hello, world" > index.html
+        echo "Hello, world?" > index.html
+        echo "${data.terraform_remote_state.db.address}" >> index.html
+        echo "${data.terraform_remote_state.db.port}" >> index.html
+        echo "test" >> index.html
         nohup busybox httpd -f -p "${var.server_port}" &
         EOF
 
@@ -56,7 +68,6 @@ resource "aws_elb" "example" {
         target = "HTTP:${var.server_port}/"
     }
 }
-data "aws_availability_zones" "all" {}
 
 resource "aws_security_group" "instance" {
     name = "tf-example-instance"
